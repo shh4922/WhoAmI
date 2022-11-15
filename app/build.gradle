@@ -46,6 +46,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
 
-    //권한요청을 물어보는 팝업창?
-    implementation 'io.github.ParkSangGwon:tedpermission-normal:3.3.0'
+
 }

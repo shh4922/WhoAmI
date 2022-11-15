@@ -8,9 +8,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- 저장공간 권한 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!-- 내장카메라 사용해도되게 해주는것 -->
-    <uses-feature android:name="android.hardware.camera"
-        android:required="true" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
 
 
