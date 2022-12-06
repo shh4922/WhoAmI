@@ -11,21 +11,40 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.mnu.whoami.databinding.ActivityMainBinding
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
+
+    private var baseurl: String? =null
+    private var gson : Gson? = null
+    private var retrofit : Retrofit ?=null
 
     val CAMERA_PERMISSION = arrayOf(android.Manifest.permission.CAMERA)
     val STORAGE_PERMISSION = arrayOf(
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
         android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-
     val FLAG_PERM_CAMERA = 98
     val FLAG_PERM_STORAGE = 99
-
     val FLAG_REQ_CAMERA = 101
+
+    init {
+        baseurl = "http://172.17.228.168:80/"
+        gson =  GsonBuilder()
+            .setLenient()
+            .create()
+
+        retrofit= Retrofit.Builder()
+            .baseUrl(baseurl)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +69,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btn_camera -> {
-
                 if (isPermitted(CAMERA_PERMISSION)) {
                     openCamera()
                 } else {
@@ -76,11 +94,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             when(requestCode){
                 FLAG_REQ_CAMERA->{
                     val bitmap = data?.extras?.get("data") as Bitmap
-                    binding.faceImg.setImageBitmap(bitmap)
+                    sendToServer(bitmap)
                 }
             }
         }
 
+    }
+
+
+    private fun sendToServer(faceImg: Bitmap){
+
+        var service = retrofit?.create(APIservice::class.java)
+        service?.SendToServer_faceimg(faceImg)
     }
 
 
