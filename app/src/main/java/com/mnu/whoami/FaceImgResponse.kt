@@ -1,3 +1,9 @@
 package com.mnu.whoami
 
-data class FaceImgResponse (var imgName: String)
+import com.google.gson.annotations.SerializedName
+
+data class FaceImgResponse(
+    @SerializedName("code") var code: String
+)
+
+

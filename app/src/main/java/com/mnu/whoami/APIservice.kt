@@ -6,12 +6,11 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 
-public interface APIservice {
+interface APIservice {
 
     //이미지 데이터 전송
     @Multipart
     @POST("getImgFromApp")
-    fun SendToServer_faceimg(
-        @Part image: MultipartBody.Part?
-    ): Call<FaceImgResponse>
+    fun SendToServer_faceimg(@Part image: MultipartBody.Part): retrofit2.Call<FaceImgResponse>
+
 }

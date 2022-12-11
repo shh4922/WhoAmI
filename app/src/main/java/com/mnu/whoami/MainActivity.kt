@@ -5,7 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,33 +16,43 @@ import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.mnu.whoami.databinding.ActivityMainBinding
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
 
-    private var baseurl: String? =null
-    private var gson : Gson? = null
-    private var retrofit : Retrofit ?=null
+    private var baseurl: String? = null
+    private var gson: Gson? = null
+    private var retrofit: Retrofit? = null
 
     val CAMERA_PERMISSION = arrayOf(android.Manifest.permission.CAMERA)
     val STORAGE_PERMISSION = arrayOf(
         android.Manifest.permission.READ_EXTERNAL_STORAGE,
         android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
+    var mCurrentPhotoPath: String? = null
     val FLAG_PERM_CAMERA = 98
     val FLAG_PERM_STORAGE = 99
     val FLAG_REQ_CAMERA = 101
 
     init {
-        baseurl = "http://172.17.228.168:80/"
-        gson =  GsonBuilder()
+        baseurl = "http://172.30.1.27:8000/"
+        gson = GsonBuilder()
             .setLenient()
             .create()
 
-        retrofit= Retrofit.Builder()
+        retrofit = Retrofit.Builder()
             .baseUrl(baseurl)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -55,16 +67,97 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnAlbum.setOnClickListener(this)
 
 
-
     }
 
     private fun showToat(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
+    private fun sendToServer(faceimgFile: File) {
+
+        var service = retrofit?.create(APIservice::class.java)
+        //이미지는 png든 jpng든 모든파일이 가능하도록 설정
+        val requestimg: RequestBody = RequestBody.create(MediaType.parse("image/*"), faceimgFile)
+        var body : MultipartBody.Part =MultipartBody.Part.createFormData("image", faceimgFile.name,requestimg)
+
+        service?.SendToServer_faceimg(body)?.enqueue(object:Callback<FaceImgResponse>{
+            override fun onFailure(call: Call<FaceImgResponse>, t: Throwable) {
+                Log.e("로그","에러",t)
+            }
+            override fun onResponse(
+                call: Call<FaceImgResponse>,
+                response: Response<FaceImgResponse>
+            ) {
+//                Log.e("로그", response.body()!!.code)
+                if(response.isSuccessful){
+                    Log.e("로그",response.body().toString())
+                    Log.e("로그",body.toString())
+                }else{
+                    Log.e("로그","에러2")
+                }
+            }
+        })
+    }
+
+
+    //
+    fun isPermitted(permissions: Array<String>): Boolean {
+
+        val result = ContextCompat.checkSelfPermission(this, permissions.toString())
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            return false
+        }
+        return true
+    }
+
+    private fun createFileName(): String {
+        val date = SimpleDateFormat("yyyyMMdd_HHmmss")
+        val filename = date.format(System.currentTimeMillis())
+        return filename
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File? {
+        val imageFileName = "faceImage"
+        val storageDir: File? = this@MainActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(
+            imageFileName,
+            ".jpg",
+            storageDir
+        )
+        mCurrentPhotoPath = image.absolutePath
+        return image
+    }
+
     /***
      * 액션리스너
      */
+
+
+    fun openCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(intent, FLAG_REQ_CAMERA)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                FLAG_REQ_CAMERA -> {
+                    if (data?.extras?.get("data") != null) {
+                        val bitmap = data?.extras?.get("data") as Bitmap
+                        var faceimgFile : File? =createImageFile()
+                        if (faceimgFile != null) {
+                            sendToServer(faceimgFile)
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
 
     override fun onClick(v: View?) {
         when (v?.id) {
@@ -81,61 +174,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    fun openCamera() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(intent, FLAG_REQ_CAMERA)
-
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode==Activity.RESULT_OK){
-            when(requestCode){
-                FLAG_REQ_CAMERA->{
-                    val bitmap = data?.extras?.get("data") as Bitmap
-                    sendToServer(bitmap)
-                }
-            }
-        }
-
-    }
-
-
-    private fun sendToServer(faceImg: Bitmap){
-
-        var service = retrofit?.create(APIservice::class.java)
-        service?.SendToServer_faceimg(faceImg)
-    }
-
-
-
-    //
-    fun isPermitted(permissions: Array<String>): Boolean {
-
-        val result = ContextCompat.checkSelfPermission(this, permissions.toString())
-        if (result != PackageManager.PERMISSION_GRANTED) {
-            return false
-        }
-        return true
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when(requestCode){
-            FLAG_PERM_CAMERA->{
+        when (requestCode) {
+            FLAG_PERM_CAMERA -> {
                 var checked = true
-                for(grant in grantResults){
-                    if (grant!= PackageManager.PERMISSION_GRANTED){
-                        checked =false
+                for (grant in grantResults) {
+                    if (grant != PackageManager.PERMISSION_GRANTED) {
+                        checked = false
                         break
                     }
                 }
-                if(checked){
+                if (checked) {
                     openCamera()
                 }
             }
@@ -144,6 +198,3 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 }
-
-
-
