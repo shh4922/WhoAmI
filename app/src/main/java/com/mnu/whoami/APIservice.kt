@@ -11,6 +11,6 @@ interface APIservice {
     //이미지 데이터 전송
     @Multipart
     @POST("getImgFromApp")
-    fun SendToServer_faceimg(@Part image: MultipartBody.Part): retrofit2.Call<FaceImgResponse>
+    fun SendToServer_faceimg(@Part file: MultipartBody.Part): retrofit2.Call<FaceImgResponse>
 
 }
