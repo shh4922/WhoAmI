@@ -8,11 +8,12 @@
     tools:context=".MainActivity">
 
         <TextView
+            android:id="@+id/tilte"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30sp"
-            android:text="누구세요?"
+            android:text="나는 누구일까요?"
             android:textColor="@color/black"
             android:textSize="20dp"
             android:textStyle="bold"></TextView>
@@ -24,13 +25,22 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:src="@drawable/ic_result2"></ImageView>
+    <TextView
+        android:id="@+id/textbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:textSize="15sp"
+        >
+
+    </TextView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-
         android:layout_margin="30dp"
-
         >
         <Button
             android:id="@+id/btn_camera"
@@ -39,6 +49,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="1"
+            android:background="@drawable/btn_round"
             android:text="시진찍기"></Button>
 
         <Button
@@ -48,6 +59,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="1"
+            android:background="@drawable/btn_round"
             android:text="앨범"></Button>
 
     </LinearLayout>

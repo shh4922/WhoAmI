@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
 
     init {
-        baseurl = "http://192.168.0.196:8080/"
+        baseurl = "http://172.17.228.168:8080/"
         gson = GsonBuilder()
             .setLenient()
             .create()
@@ -101,12 +101,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         startActivityForResult(intent, FLAG_REQ_CAMERA)
     }
 
+    /***
+     * 토스트메시지 출력
+     */
     private fun showToat(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
+
     /***
-     * 서버로 이미지파일 전
+     * 서버로 이미지파일 전송
      */
     private fun sendToServer(faceimgFile: File) {
 
@@ -129,21 +133,33 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     when(response.body()?.name.toString()){
                         "yuumi"->{
+                            binding.tilte.text="당신은 '유미'! 를 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '유미' 입니다 \n 냥냥냥냥ㄴ야냥냐야냥나냐안안얀양!!!"
                             binding.resultImg.setImageResource(R.drawable.yuumi)
                         }
                         "leesin"->{
+                            binding.tilte.text="당신은 '리신'! 을 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '리신' 입니다 \n 눈은 괜찮으신가요?"
                             binding.resultImg.setImageResource(R.drawable.leesin)
                         }
                         "singed"->{
+                            binding.tilte.text="당신은 '신지드'! 를 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '신지드' 입니다 \n 방귀뀌기 좋아하시나보네요?"
                             binding.resultImg.setImageResource(R.drawable.singed)
                         }
                         "trundle"->{
+                            binding.tilte.text="당신은 '트런들' 을 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '트런들' 입니다 \n 롤에서 제일 못생긴 챔피언중 하나입니다"
                             binding.resultImg.setImageResource(R.drawable.trundle)
                         }
                         "lux"->{
+                            binding.tilte.text="당신은 '럭스' 를 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '럭스' 입니다 \n 빛으로 강타해요"
                             binding.resultImg.setImageResource(R.drawable.lux)
                         }
                         "garen"->{
+                            binding.tilte.text="당신은 '가렌' 을 닮았네요!"
+                            binding.textbox.text="당신이 닮은 챔피언은 '가렌' 입니다 \n 남자중에 남자 입니다."
                             binding.resultImg.setImageResource(R.drawable.garen)
                         }
                     }
@@ -154,7 +170,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-
+    /***
+     * 서버로 전송할 파일 생성.
+     */
     @Throws(IOException::class)
     private fun createImageFile(): File? {
         val imageFileName = "faceImage"
@@ -168,7 +186,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return image
     }
 
-    fun bitmapToFile(bitmap: Bitmap, path: String): File{
+
+    /***
+     * bitmapToFile 이미지 파일로 변환 테스트
+     */
+    private fun bitmapToFile(bitmap: Bitmap, path: String): File{
         var file = File(path)
         var out: OutputStream? = null
         try{
@@ -181,13 +203,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return file
     }
 
+
+    /***
+     * pathToBitmap 파일을 bitmap이미지로 변환 테스트
+     */
     private fun pathToBitmap(path: String?) {
         val bitmap = BitmapFactory.decodeFile(path)
         binding.resultImg.setImageBitmap(bitmap)
     }
 
+
     /***
-     * 카메라가 촬영완료했을때인것같음
+     * 카메라 촬영이후 실행되는 함수
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -239,6 +266,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /***
+     * 버튼 온클릭
+     */
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btn_camera -> {
